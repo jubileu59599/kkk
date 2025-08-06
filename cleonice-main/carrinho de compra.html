@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrinho de Compras</title>
+    <link rel="stylesheet" href="../cleonice-main/carrinho.css" />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <span>Carrinho de compras</b></span>
+    </header>
+    <main>
+      <div class="page-title">Seu Carrinho</div>
+      <div class="content">
+        <section>
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Quantidade</th>
+                <th>Total</th>
+                <th>-</th>
+              </tr>
+            </thead>
+            <tbody id="carrinho-body">
+              <!-- Os produtos serão inseridos aqui pelo JS -->
+            </tbody>
+          </table>
+        </section>
+        <aside>
+          <div class="box">
+            <header>Resumo da compra</header>
+            <div class="info">
+              <div><span>Sub-total</span><span>R$ 11.170.017,66</span></div>
+              <div><span>Frete</span><span>1.000.000,00</span></div>
+              <div>
+                <button>
+                  Adicionar cupom de desconto
+                  <i class="bx bx-right-arrow-alt"></i>
+                </button>
+              </div>
+            </div>
+            <footer>
+              <span>Total</span>
+              <span>R$ 12.170.017,66</span>
+            </footer>
+          </div>
+          <button>Finalizar Compra</button>
+        </aside>
+      </div>
+    </main>
+    <script>
+      function formatarParaBR(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+    
+      function formatarPreco(preco) {
+        return parseFloat(preco.replace(/[^\d,]/g, '').replace(',', '.'));
+      }
+    
+      function carregarCarrinho() {
+        const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const tbody = document.getElementById('carrinho-body');
+        tbody.innerHTML = '';
+    
+        let subtotal = 0;
+    
+        carrinho.forEach((produto, index) => {
+          const preco = formatarPreco(produto.preco);
+          const total = preco * produto.quantidade;
+          subtotal += total;
+    
+          const linha = document.createElement('tr');
+          linha.innerHTML = `
+            <td>
+              <div class="product">
+                <img src="${produto.imagem}" alt="${produto.nome}" />
+                <div class="info">
+                  <div class="name">${produto.nome}</div>
+                </div>
+              </div>
+            </td>
+            <td>${produto.preco}</td>
+            <td>
+              <div class="qty">
+                <button onclick="alterarQtd(${index}, -1)"><i class="bx bx-minus"></i></button>
+                <span>${produto.quantidade}</span>
+                <button onclick="alterarQtd(${index}, 1)"><i class="bx bx-plus"></i></button>
+              </div>
+            </td>
+            <td>${formatarParaBR(total)}</td>
+            <td>
+              <button class="remove" onclick="removerProduto(${index})"><i class="bx bx-x"></i></button>
+            </td>
+          `;
+          tbody.appendChild(linha);
+        });
+    
+        document.querySelector("aside .info > div:nth-child(1) span:last-child").textContent = formatarParaBR(subtotal);
+        const frete = 1000000;
+        const totalGeral = subtotal + frete;
+        document.querySelector("aside footer span:last-child").textContent = formatarParaBR(totalGeral);
+      }
+    
+      function alterarQtd(index, delta) {
+        const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        carrinho[index].quantidade += delta;
+        if (carrinho[index].quantidade <= 0) {
+          carrinho.splice(index, 1);
+        }
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        carregarCarrinho();
+      }
+    
+      function removerProduto(index) {
+        const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        carrinho.splice(index, 1);
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        carregarCarrinho();
+      }
+    
+      // Inicializar ao carregar a página
+      window.onload = carregarCarrinho;
+    </script>
+    </body>
+    </html>
+  </body>
+</html>
